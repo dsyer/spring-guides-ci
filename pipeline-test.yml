@@ -83,7 +83,8 @@ resources:
 - name: ci
   type: git
   source:
-    uri: https://github.com/spring-guides/spring-guides-ci.git
+    uri: https://github.com/dsyer/spring-guides-ci.git
+    branch: rabbit
 
 - name: base-image
   type: docker-image
