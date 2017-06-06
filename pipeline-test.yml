@@ -40,7 +40,7 @@ jobs:
       PRIVATE_KEY: {{private-key}}
   - put: rabbit-base-image
     params:
-      build: build/rabbit
+      build: ci/rabbit
 - name: maven-test
   plan:
   - aggregate:
