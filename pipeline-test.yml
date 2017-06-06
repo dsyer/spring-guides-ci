@@ -2,65 +2,66 @@
 # for getting started guides is generated.
 ---
 jobs:
-- name: maven-image
+- name: image
   public: true
   serial: true
   plan:
   - aggregate:
     - get: ci
       trigger: true
-    - get: maven-image-source
+    - get: image-source
       trigger: true
-  - task: setup
-    file: ci/maven/setup.yml
-    input_mapping:
-      source: maven-image-source
+  - aggregate:
+    - task: setup
+      file: ci/image/setup.yml
+      input_mapping:
+        source: image-source
+      params:
+        PUBLIC_KEY: {{public-key}}
+        PRIVATE_KEY: {{private-key}}
+  - put: base-image
     params:
-      PUBLIC_KEY: {{public-key}}
-      PRIVATE_KEY: {{private-key}}
-  - put: maven-base-image
-    params:
-      build: build/maven
-- name: gradle-image
+      build: build/image
+- name: rabbit-image
   public: true
   serial: true
   plan:
   - aggregate:
     - get: ci
       trigger: true
-    - get: gradle-image-source
+    - get: rabbit-image-source
       trigger: true
   - task: setup
-    file: ci/gradle/setup.yml
+    file: ci/image/setup.yml
     input_mapping:
       source: gradle-image-source
-  - put: gradle-base-image
+  - put: rabbit-base-image
     params:
-      build: build/gradle
-- name: maven
+      build: build/rabbit
+- name: maven-test
   plan:
   - aggregate:
     - get: ci
     - get: gs-rest-service
       trigger: true
-    - get: maven-base-image
+    - get: base-image
       trigger: true
-      passed: [maven-image]
+      passed: [image]
   - task: gs-rest-service-maven
-    file: ci/maven/install.yml
+    file: ci/tasks/install.yml
     input_mapping:
       source: gs-rest-service
-- name: gradle
+- name: gradle-test
   plan:
   - aggregate:
     - get: ci
     - get: gs-rest-service
       trigger: true
-    - get: gradle-base-image
+    - get: base-image
       trigger: true
-      passed: [gradle-image]
+      passed: [image]
   - task: gs-rest-service-gradle
-    file: ci/gradle/build.yml
+    file: ci/tasks/build.yml
     input_mapping:
       source: gs-rest-service
 
@@ -70,35 +71,29 @@ resources:
   source:
     uri: https://github.com/spring-guides/gs-rest-service.git
 
-- name: maven-image-source
+- name: image-source
   type: git
   source:
     uri: https://github.com/spring-guides/gs-rest-service.git
-    paths: [complete/pom.xml]
-
-- name: gradle-image-source
-  type: git
-  source:
-    uri: https://github.com/spring-guides/gs-rest-service.git
-    paths: [complete/build.gradle]
+    paths: [complete/pom.xml, complete/build.gradle]
 
 - name: ci
   type: git
   source:
     uri: https://github.com/spring-guides/spring-guides-ci.git
 
-- name: maven-base-image
+- name: base-image
   type: docker-image
   source:
     email: {{docker-hub-email}}
     username: {{docker-hub-username}}
     password: {{docker-hub-password}}
-    repository: springio/maven-base
+    repository: springio/spring-ci-base
 
-- name: gradle-base-image
+- name: rabbit-base-image
   type: docker-image
   source:
     email: {{docker-hub-email}}
     username: {{docker-hub-username}}
     password: {{docker-hub-password}}
-    repository: springio/gradle-base
+    repository: springio/spring-rabbit-base

@@ -3,13 +3,13 @@ platform: linux
 image_resource:
   type: docker-image
   source: 
-    repository: springio/gradle-base
+    repository: springio/spring-ci-base
 inputs:
   - name: source
 run:
   dir: source/complete
-  path: ./gradlew
+  path: ./mvnw
   args:
-  - build
+  - install
 params:
   TERM: dumb

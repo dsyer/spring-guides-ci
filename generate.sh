@@ -7,6 +7,7 @@
 
 output=pipeline.yml;
 mavens=();
+rabbits=();
 gradles=();
 
 function project() {
@@ -103,11 +104,17 @@ EOF
 for f in `find ../gs-* -name complete -type d | sort`; do
     if [ -e $f/pom.xml ]; then
         project=$(project $f)
-        mavens+=(${project});
+        if echo ${project} | grep -q rabbit; then
+            rabbits+=(${project});
+        else
+            mavens+=(${project});
+        fi
     fi
     if [ -e $f/build.gradle ]; then
         project=$(project $f)
-        gradles+=(${project});
+        if ! echo ${project} | grep -q rabbit; then
+            gradles+=(${project});
+        fi
     fi
 done
 
@@ -170,11 +177,24 @@ EOF
 for project in "${mavens[@]}"; do
     echo >> $output "  - "${project}"-maven"
 done
+for project in "${rabbits[@]}"; do
+    echo >> $output "  - "${project}"-maven"
+done
 cat >> $output <<EOF
 - name: gradle
   jobs:
 EOF
 for project in "${gradles[@]}"; do
+    echo >> $output "  - "${project}"-gradle"
+done
+for project in "${rabbits[@]}"; do
+    echo >> $output "  - "${project}"-gradle"
+done
+- name: rabbit
+  jobs:
+EOF
+for project in "${rabbits[@]}"; do
+    echo >> $output "  - "${project}"-maven"
     echo >> $output "  - "${project}"-gradle"
 done
 
