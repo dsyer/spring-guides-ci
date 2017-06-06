@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk
 VOLUME /tmp
 
 RUN apk add --update gnupg
@@ -10,4 +10,4 @@ ADD source /source
 RUN cd /source/complete && ./mvnw install && ./mvnw clean
 RUN cd /source/complete && ./gradlew build && ./gradlew clean
 
-ENTRYPOINT ["/bin/sh"]
+ENTRYPOINT ["/bin/bash"]

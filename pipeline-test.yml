@@ -29,12 +29,15 @@ jobs:
   - aggregate:
     - get: ci
       trigger: true
-    - get: rabbit-image-source
+    - get: image-source
       trigger: true
   - task: setup
     file: ci/image/setup.yml
     input_mapping:
-      source: gradle-image-source
+      source: image-source
+    params:
+      PUBLIC_KEY: {{public-key}}
+      PRIVATE_KEY: {{private-key}}
   - put: rabbit-base-image
     params:
       build: build/rabbit
