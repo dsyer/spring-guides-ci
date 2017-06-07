@@ -1,17 +1,9 @@
-FROM docker:dind
+FROM rabbitmq:management
+
 ENV LANG C.UTF-8
-ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
-ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
-ENV JAVA_VERSION 8u131
-
-RUN apk add --no-cache py-pip curl
-RUN pip install docker-compose
-RUN apk add --no-cache openjdk8
-
-ADD run.sh /run.sh
-ADD docker-compose.yml /docker-compose.yml
-
-RUN mkdir /etc/docker && echo '{"debug":true}' > /etc/docker/daemon.json
+RUN echo 'deb http://deb.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
+RUN apt-get update
+RUN apt-get install -y -t jessie-backports openjdk-8-jdk ca-certificates-java
 
 CMD ["/bin/sh"]
