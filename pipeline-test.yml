@@ -52,6 +52,7 @@ jobs:
       passed: [image]
   - task: gs-rest-service-maven
     file: ci/tasks/install.yml
+    image: base-image
     input_mapping:
       source: gs-rest-service
 - name: gradle-test
@@ -65,6 +66,7 @@ jobs:
       passed: [image]
   - task: gs-rest-service-gradle
     file: ci/tasks/build.yml
+    image: base-image
     input_mapping:
       source: gs-rest-service
 - name: rabbit-maven-test
@@ -78,6 +80,8 @@ jobs:
       passed: [rabbit-image]
   - task: gs-messaging-rabbitmq-maven
     file: ci/rabbit/install.yml
+    image: rabbit-base-image
+    privileged: true
     input_mapping:
       source: gs-messaging-rabbitmq
 - name: rabbit-gradle-test
@@ -91,6 +95,8 @@ jobs:
       passed: [rabbit-image]
   - task: gs-messaging-rabbitmq
     file: ci/rabbit/build.yml
+    image: rabbit-base-image
+    privileged: true
     input_mapping:
       source: gs-messaging-rabbitmq
 
