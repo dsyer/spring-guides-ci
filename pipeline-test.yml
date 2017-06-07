@@ -67,12 +67,43 @@ jobs:
     file: ci/tasks/build.yml
     input_mapping:
       source: gs-rest-service
+- name: rabbit-maven-test
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-messaging-rabbitmq
+      trigger: true
+    - get: rabbit-base-image
+      trigger: true
+      passed: [rabbit-image]
+  - task: gs-messaging-rabbitmq-maven
+    file: ci/rabbit/install.yml
+    input_mapping:
+      source: gs-messaging-rabbitmq
+- name: rabbit-gradle-test
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-messaging-rabbitmq
+      trigger: true
+    - get: rabbit-base-image
+      trigger: true
+      passed: [rabbit-image]
+  - task: gs-messaging-rabbitmq
+    file: ci/rabbit/build.yml
+    input_mapping:
+      source: gs-messaging-rabbitmq
 
 resources:
 - name: gs-rest-service
   type: git
   source:
     uri: https://github.com/spring-guides/gs-rest-service.git
+
+- name: gs-messaging-rabbitmq
+  type: git
+  source:
+    uri: https://github.com/spring-guides/gs-messaging-rabbitmq.git
 
 - name: image-source
   type: git
