@@ -22,6 +22,25 @@ jobs:
   - put: base-image
     params:
       build: build/image
+- name: neo-image
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: ci
+      trigger: true
+    - get: image-source
+      trigger: true
+  - task: setup
+    file: ci/image/setup.yml
+    input_mapping:
+      source: image-source
+    params:
+      PUBLIC_KEY: {{public-key}}
+      PRIVATE_KEY: {{private-key}}
+  - put: neo-base-image
+    params:
+      build: ci/neo
 - name: maven-test
   plan:
   - aggregate:
@@ -111,4 +130,7 @@ resources:
 - name: neo-base-image
   type: docker-image
   source:
-    repository: neo4j
+    email: {{docker-hub-email}}
+    username: {{docker-hub-username}}
+    password: {{docker-hub-password}}
+    repository: springio/spring-neo-base
