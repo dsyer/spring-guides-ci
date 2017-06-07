@@ -29,7 +29,7 @@ resources:
   type: git
   source:
     uri: https://github.com/dsyer/spring-guides-ci.git
-    branch: rabbit
+    branch: mongo
 - name: base-image
   type: docker-image
   source:
@@ -250,11 +250,20 @@ groups:
   jobs:
   - image
   - rabbit-image
+  - mongo-image
 EOF
 for project in "${mavens[@]}"; do
     echo >> $output "  - "${project}"-maven"
 done
 for project in "${gradles[@]}"; do
+    echo >> $output "  - "${project}"-gradle"
+done  
+for project in "${rabbits[@]}"; do
+    echo >> $output "  - "${project}"-maven"
+    echo >> $output "  - "${project}"-gradle"
+done  
+for project in "${mongos[@]}"; do
+    echo >> $output "  - "${project}"-maven"
     echo >> $output "  - "${project}"-gradle"
 done  
 cat >> $output <<EOF
