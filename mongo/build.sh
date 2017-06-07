@@ -1,5 +1,5 @@
 #!/bin/sh
 
-ci/rabbit/run.sh
+ci/mongo/run.sh
 cd source/complete
 ./gradlew build
