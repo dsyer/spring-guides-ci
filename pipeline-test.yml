@@ -77,6 +77,7 @@ jobs:
       trigger: true
     - get: neo-base-image
       trigger: true
+      passed: [neo-image]
   - task: gs-accessing-data-neo4j
     file: ci/neo/install.yml
     image: neo-base-image
@@ -90,6 +91,7 @@ jobs:
       trigger: true
     - get: neo-base-image
       trigger: true
+      passed: [neo-image]
   - task: gs-accessing-data-neo4j
     file: ci/neo/build.yml
     image: neo-base-image
