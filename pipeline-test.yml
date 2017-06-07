@@ -81,7 +81,6 @@ jobs:
   - task: gs-accessing-data-mongodb
     file: ci/mongo/install.yml
     image: mongo-base-image
-    privileged: true
     input_mapping:
       source: gs-accessing-data-mongodb
 - name: mongo-gradle-test
@@ -96,7 +95,6 @@ jobs:
   - task: gs-accessing-data-mongodb
     file: ci/mongo/build.yml
     image: mongo-base-image
-    privileged: true
     input_mapping:
       source: gs-accessing-data-mongodb
 
