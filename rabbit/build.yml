@@ -5,3 +5,5 @@ inputs:
   - name: ci
 run:
   path: ci/rabbit/build.sh
+params:
+  TERM: dumb
