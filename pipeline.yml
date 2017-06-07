@@ -26,6 +26,13 @@ resources:
     username: {{docker-hub-username}}
     password: {{docker-hub-password}}
     repository: springio/spring-rabbit-base
+- name: mongo-base-image
+  type: docker-image
+  source:
+    email: {{docker-hub-email}}
+    username: {{docker-hub-username}}
+    password: {{docker-hub-password}}
+    repository: springio/spring-mongo-base
 - name: gs-accessing-data-gemfire
   type: git
   source:
@@ -267,6 +274,25 @@ jobs:
   - put: rabbit-base-image
     params:
       build: ci/rabbit
+- name: mongo-image
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: ci
+      trigger: true
+    - get: image-source
+      trigger: true
+  - task: setup
+    file: ci/image/setup.yml
+    input_mapping:
+      source: image-source
+    params:
+      PUBLIC_KEY: {{public-key}}
+      PRIVATE_KEY: {{private-key}}
+  - put: mongo-base-image
+    params:
+      build: ci/mongo
 
 - name: gs-accessing-data-gemfire-maven
   plan:
@@ -295,20 +321,6 @@ jobs:
     image: base-image
     input_mapping:
       source: gs-accessing-data-jpa
-
-- name: gs-accessing-data-mongodb-maven
-  plan:
-  - aggregate:
-    - get: ci
-    - get: gs-accessing-data-mongodb
-      trigger: true
-    - get: base-image
-      passed: [image]
-  - task: maven
-    file: ci/tasks/install.yml
-    image: base-image
-    input_mapping:
-      source: gs-accessing-data-mongodb
 
 - name: gs-accessing-data-neo4j-maven
   plan:
@@ -365,20 +377,6 @@ jobs:
     image: base-image
     input_mapping:
       source: gs-accessing-gemfire-data-rest
-
-- name: gs-accessing-mongodb-data-rest-maven
-  plan:
-  - aggregate:
-    - get: ci
-    - get: gs-accessing-mongodb-data-rest
-      trigger: true
-    - get: base-image
-      passed: [image]
-  - task: maven
-    file: ci/tasks/install.yml
-    image: base-image
-    input_mapping:
-      source: gs-accessing-mongodb-data-rest
 
 - name: gs-accessing-neo4j-data-rest-maven
   plan:
@@ -968,20 +966,6 @@ jobs:
     input_mapping:
       source: gs-accessing-data-jpa
 
-- name: gs-accessing-data-mongodb-gradle
-  plan:
-  - aggregate:
-    - get: ci
-    - get: gs-accessing-data-mongodb
-      trigger: true
-    - get: base-image
-      passed: [image]
-  - task: gradle
-    file: ci/tasks/build.yml
-    image: base-image
-    input_mapping:
-      source: gs-accessing-data-mongodb
-
 - name: gs-accessing-data-neo4j-gradle
   plan:
   - aggregate:
@@ -1037,20 +1021,6 @@ jobs:
     image: base-image
     input_mapping:
       source: gs-accessing-gemfire-data-rest
-
-- name: gs-accessing-mongodb-data-rest-gradle
-  plan:
-  - aggregate:
-    - get: ci
-    - get: gs-accessing-mongodb-data-rest
-      trigger: true
-    - get: base-image
-      passed: [image]
-  - task: gradle
-    file: ci/tasks/build.yml
-    image: base-image
-    input_mapping:
-      source: gs-accessing-mongodb-data-rest
 
 - name: gs-accessing-neo4j-data-rest-gradle
   plan:
@@ -1563,11 +1533,65 @@ jobs:
       trigger: true
     - get: rabbit-base-image
       passed: [rabbit-image]
-  - task: maven
+  - task: gradle
     file: ci/rabbit/build.yml
     image: rabbit-base-image
     input_mapping:
       source: gs-messaging-rabbitmq
+
+- name: gs-accessing-data-mongodb-maven
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-accessing-data-mongodb
+      trigger: true
+    - get: mongo-base-image
+      passed: [mongo-image]
+  - task: maven
+    file: ci/mongo/install.yml
+    image: mongo-base-image
+    input_mapping:
+      source: gs-accessing-data-mongodb
+- name: gs-accessing-data-mongodb-gradle
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-accessing-data-mongodb
+      trigger: true
+    - get: mongo-base-image
+      passed: [mongo-image]
+  - task: gradle
+    file: ci/mongo/build.yml
+    image: mongo-base-image
+    input_mapping:
+      source: gs-accessing-data-mongodb
+
+- name: gs-accessing-mongodb-data-rest-maven
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-accessing-mongodb-data-rest
+      trigger: true
+    - get: mongo-base-image
+      passed: [mongo-image]
+  - task: maven
+    file: ci/mongo/install.yml
+    image: mongo-base-image
+    input_mapping:
+      source: gs-accessing-mongodb-data-rest
+- name: gs-accessing-mongodb-data-rest-gradle
+  plan:
+  - aggregate:
+    - get: ci
+    - get: gs-accessing-mongodb-data-rest
+      trigger: true
+    - get: mongo-base-image
+      passed: [mongo-image]
+  - task: gradle
+    file: ci/mongo/build.yml
+    image: mongo-base-image
+    input_mapping:
+      source: gs-accessing-mongodb-data-rest
 
 groups:
 - name: all
@@ -1576,12 +1600,10 @@ groups:
   - rabbit-image
   - gs-accessing-data-gemfire-maven
   - gs-accessing-data-jpa-maven
-  - gs-accessing-data-mongodb-maven
   - gs-accessing-data-neo4j-maven
   - gs-accessing-data-rest-maven
   - gs-accessing-facebook-maven
   - gs-accessing-gemfire-data-rest-maven
-  - gs-accessing-mongodb-data-rest-maven
   - gs-accessing-neo4j-data-rest-maven
   - gs-accessing-twitter-maven
   - gs-actuator-service-maven
@@ -1624,12 +1646,10 @@ groups:
   - gs-validating-form-input-maven
   - gs-accessing-data-gemfire-gradle
   - gs-accessing-data-jpa-gradle
-  - gs-accessing-data-mongodb-gradle
   - gs-accessing-data-neo4j-gradle
   - gs-accessing-data-rest-gradle
   - gs-accessing-facebook-gradle
   - gs-accessing-gemfire-data-rest-gradle
-  - gs-accessing-mongodb-data-rest-gradle
   - gs-accessing-neo4j-data-rest-gradle
   - gs-accessing-twitter-gradle
   - gs-actuator-service-gradle
@@ -1673,12 +1693,10 @@ groups:
   jobs:
   - gs-accessing-data-gemfire-maven
   - gs-accessing-data-jpa-maven
-  - gs-accessing-data-mongodb-maven
   - gs-accessing-data-neo4j-maven
   - gs-accessing-data-rest-maven
   - gs-accessing-facebook-maven
   - gs-accessing-gemfire-data-rest-maven
-  - gs-accessing-mongodb-data-rest-maven
   - gs-accessing-neo4j-data-rest-maven
   - gs-accessing-twitter-maven
   - gs-actuator-service-maven
@@ -1720,16 +1738,16 @@ groups:
   - gs-uploading-files-maven
   - gs-validating-form-input-maven
   - gs-messaging-rabbitmq-maven
+  - gs-accessing-data-mongodb-maven
+  - gs-accessing-mongodb-data-rest-maven
 - name: gradle
   jobs:
   - gs-accessing-data-gemfire-gradle
   - gs-accessing-data-jpa-gradle
-  - gs-accessing-data-mongodb-gradle
   - gs-accessing-data-neo4j-gradle
   - gs-accessing-data-rest-gradle
   - gs-accessing-facebook-gradle
   - gs-accessing-gemfire-data-rest-gradle
-  - gs-accessing-mongodb-data-rest-gradle
   - gs-accessing-neo4j-data-rest-gradle
   - gs-accessing-twitter-gradle
   - gs-actuator-service-gradle
@@ -1766,7 +1784,15 @@ groups:
   - gs-uploading-files-gradle
   - gs-validating-form-input-gradle
   - gs-messaging-rabbitmq-gradle
+  - gs-accessing-data-mongodb-gradle
+  - gs-accessing-mongodb-data-rest-gradle
 - name: rabbit
   jobs:
   - gs-messaging-rabbitmq-maven
   - gs-messaging-rabbitmq-gradle
+- name: mongo
+  jobs:
+  - gs-accessing-data-mongodb-maven
+  - gs-accessing-data-mongodb-gradle
+  - gs-accessing-mongodb-data-rest-maven
+  - gs-accessing-mongodb-data-rest-gradle
